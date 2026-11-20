@@ -1,0 +1,27 @@
+[
+  {
+    "slug": "executive-assistant",
+    "title": "Executive Assistant (US founders)",
+    "type": "Remote",
+    "hours": "Full-time, US Eastern hours",
+    "location": "Philippines",
+    "summary": "Support a US founder with inbox, calendar, travel and follow-ups.",
+    "open": true,
+    "sections": [
+      { "heading": "What you'll do", "items": ["Run daily inbox triage", "Manage a busy calendar across timezones", "Book travel and prepare meeting notes"] },
+      { "heading": "What you'll need", "items": ["2+ years supporting an executive", "Fluent written English", "Reliable internet with a backup connection"] }
+    ]
+  },
+  {
+    "slug": "social-media-assistant",
+    "title": "Social Media Assistant",
+    "type": "Remote",
+    "hours": "Part-time, 20 hrs/week",
+    "location": "Philippines",
+    "summary": "Schedule content, design posts in Canva and keep community replies moving.",
+    "open": true,
+    "sections": [
+      { "heading": "What you'll do", "items": ["Plan and schedule posts", "Design graphics in Canva", "Reply to comments and messages"] }
+    ]
+  }
+]

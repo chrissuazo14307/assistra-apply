@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- /p/ profile pages carry personal details — keep them out of search engines. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Assistra — Applicant Profile Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#D4AF37; --brand-text:#7F6921; --brand-tint:#FCF9EF; --brand-line:#F4EACD;
+  --ink:#1c1b19; --muted:#6c6a66; --soft:#9a978f; --bg:#f5f3ee; --card:#fff; --line:#e4e0d6;
+  --bad:#b3261e; --z:1; --top:60px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Poppins,system-ui,sans-serif;font-size:14px;color:var(--ink);background:var(--bg);line-height:1.45}
+a{color:var(--brand-text)}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+
+/* ── Top bar ── */
+.topbar{position:sticky;top:0;z-index:20;height:var(--top);display:flex;align-items:center;gap:8px;padding:0 20px;
+  background:#16150f;color:#fff;border-bottom:3px solid var(--brand)}
+.topbar .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.topbar .logo img{height:32px;max-width:160px;object-fit:contain}
+.topbar .logo b{font-size:18px;letter-spacing:.5px}
+.topbar .sub{font-size:12px;color:#c9c5ba;padding-left:12px;border-left:1px solid #3a382f;margin-left:4px}
+.spacer{flex:1}
+.btn{border:1px solid #4a473d;background:transparent;color:#fff;border-radius:8px;padding:7px 13px;font-size:13px;white-space:nowrap}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#16150f;font-weight:600}
+.btn:disabled{opacity:.6;cursor:default}
+.stage .btn,.dialog .btn{color:var(--ink);border-color:var(--line);background:#fff}
+.dialog .btn.primary{background:var(--brand);border-color:var(--brand);color:#16150f}
+
+.tabs{display:none;position:sticky;top:var(--top);z-index:15;background:#fff;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;border:0;background:none;padding:11px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent}
+.tabs button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--brand)}
+
+/* ── Layout ── */
+.shell{display:grid;grid-template-columns:minmax(380px,560px) 1fr;gap:0;min-height:calc(100vh - var(--top))}
+.composer{padding:22px 22px 80px;border-right:1px solid var(--line);background:var(--bg)}
+.intro{color:var(--muted);margin:0 0 18px;font-size:13.5px}
+fieldset{min-width:0;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:16px 18px 18px;margin:0 0 16px}
+legend{font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--brand-text);padding:0 6px}
+label.f{display:block;margin-bottom:12px}
+label.f>span{display:block;font-weight:500;font-size:13px;margin-bottom:5px}
+.hint{font-style:normal;font-weight:300;color:var(--soft);font-size:12px;margin-left:4px}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{
+  width:100%;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus,.chips:focus-within{outline:2px solid var(--brand-line);border-color:var(--brand)}
+textarea{min-height:96px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row.thirds{grid-template-columns:1fr 1fr 1fr}
+.row>label.f{min-width:0}
+.photo-row{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.photo-row>label.f{min-width:0}
+input[type=file]{max-width:100%;font-size:12.5px}
+.photo-prev{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--brand-tint);border:1px solid var(--brand-line);flex:none}
+.photo-prev:not([src]),.photo-prev[src=""]{visibility:visible}
+.lock{margin:-4px 0 14px;font-size:12.5px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:44px;cursor:text}
+.chips input{flex:1;min-width:140px;border:0!important;outline:0!important;padding:5px!important}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--brand-tint);border:1px solid var(--brand-line);color:var(--brand-text);
+  border-radius:999px;padding:3px 4px 3px 10px;font-size:12.5px}
+.chip button{border:0;background:none;color:inherit;font-size:15px;line-height:1;padding:0 4px}
+
+.repeat{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;background:#fdfcfa}
+.repeat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.link{border:0;background:none;color:var(--bad);font-size:12.5px;padding:0}
+.add{border:1px dashed var(--brand);background:var(--brand-tint);color:var(--brand-text);border-radius:8px;padding:8px 12px;font-weight:500;width:100%}
+
+#job-banner{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;background:var(--brand-tint);border:1px solid var(--brand-line);
+  border-left:4px solid var(--brand);border-radius:10px;padding:12px 14px;margin-bottom:16px}
+#job-banner b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--brand-text)}
+#job-banner span{font-weight:600;flex:1 1 100%}
+#job-banner a{font-size:13px}
+.err{background:#fdecea;color:var(--bad);border:1px solid #f4c7c3;border-radius:10px;padding:10px 12px;margin:0 0 16px}
+
+/* ── Preview stage ── */
+.stage{position:sticky;top:var(--top);height:calc(100vh - var(--top));overflow:auto;padding:16px 24px 40px}
+.stage-tools{display:flex;align-items:center;gap:10px;margin-bottom:14px;color:var(--muted);font-size:13px}
+#fillcount{font-weight:500}
+.meter{width:120px;height:6px;border-radius:9px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--brand);width:0;transition:width .25s}
+.sheet-box{position:relative;margin:0 auto;overflow:hidden}
+.sheet-scaler{transform:scale(var(--z));transform-origin:0 0;width:794px}
+#sheet{width:794px;min-height:1123px;background:#fff;box-shadow:0 2px 20px rgba(0,0,0,.08);color:#222;font-size:9.5pt;display:flex;flex-direction:column}
+
+/* the A4 sheet itself */
+.sh-band{display:flex;justify-content:space-between;align-items:center;background:#16150f;color:#fff;padding:18px 34px;border-bottom:4px solid var(--brand)}
+.sh-band img{height:36px;max-width:220px;object-fit:contain}
+.sh-band .wm{font-size:18pt;font-weight:700;letter-spacing:.5px;color:var(--brand)}
+.sh-band .id{text-align:right;font-size:7.5pt;color:#c9c5ba;text-transform:uppercase;letter-spacing:.1em}
+.sh-band .id b{display:block;color:#fff;font-size:10.5pt;letter-spacing:.04em;text-transform:none}
+.sh-id{display:flex;gap:22px;align-items:center;padding:26px 34px 18px}
+.face{width:108px;height:108px;border-radius:50%;object-fit:cover;border:3px solid var(--brand-line)}
+.sh-name{margin:0;font-size:22pt;line-height:1.1;font-weight:700}
+.sh-role{margin:4px 0 8px;font-size:11pt;color:var(--brand-text);font-weight:500}
+.sh-meta span{font-size:9pt;color:#666}
+.sh-meta span+span:before{content:" · "}
+.sh-link{margin:6px 0 0;font-size:8.5pt;color:#555;word-break:break-all}
+.sh-link a{color:var(--brand-text)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);margin:0 34px;border:1px solid var(--brand-line);border-radius:8px;background:var(--brand-tint)}
+.strip>div{padding:9px 12px}
+.strip>div+div{border-left:1px solid var(--brand-line)}
+.strip dt{font-size:7pt;text-transform:uppercase;letter-spacing:.1em;color:var(--brand-text);font-weight:600}
+.strip dd{margin:2px 0 0;font-size:8.8pt;font-weight:500}
+.sh-body{display:grid;grid-template-columns:1.75fr 1fr;gap:28px;padding:8px 34px 24px;flex:1}
+.sec{font-size:8pt;text-transform:uppercase;letter-spacing:.12em;color:var(--brand-text);margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--brand-line)}
+.summary{margin:0;line-height:1.55}
+.job{margin-bottom:12px;break-inside:avoid}
+.jt{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.jr{margin:0;font-weight:600;font-size:10pt}
+.jp{font-size:8.3pt;color:#777;white-space:nowrap}
+.jc{margin:1px 0 4px;color:#666;font-size:8.8pt}
+.job ul{margin:0;padding-left:16px}
+.job li{margin:2px 0}
+.edu{margin-bottom:7px}
+.edu b{display:block;font-size:9.3pt}
+.edu span{color:#666;font-size:8.6pt}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags i{font-style:normal;font-size:8.3pt;background:var(--brand-tint);border:1px solid var(--brand-line);border-radius:999px;padding:2px 9px}
+.slist{list-style:none;margin:0;padding:0}
+.slist li{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dotted #ddd;font-size:8.8pt}
+.slist em{font-style:normal;color:var(--brand-text);font-size:8pt;text-transform:capitalize}
+.sh-foot{display:flex;align-items:center;gap:10px;padding:12px 34px;border-top:1px solid var(--brand-line);background:var(--brand-tint);font-size:8pt;color:#555}
+.sh-foot img{height:20px}
+.sh-foot .seal{width:18px;height:18px;border-radius:50%;background:var(--brand);color:#16150f;display:grid;place-items:center;font-size:10px;font-weight:700}
+.sh-foot b{color:var(--brand-text)}
+.sh-foot .grow{flex:1}
+.empty{color:#b5b2aa;font-style:italic}
+
+/* web-only cards on a shared profile */
+.vidwrap{max-width:794px;margin:0 auto 16px}
+.vidcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.vidcard h2{margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--brand-text)}
+.frame{position:relative;padding-top:56.25%;border-radius:8px;overflow:hidden;background:#000}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.fallback{margin:0;word-break:break-all}
+.state{max-width:520px;margin:60px auto;text-align:center;color:var(--muted)}
+.state b{display:block;font-size:18px;color:var(--ink);margin-bottom:6px}
+.state code{display:inline-block;margin-top:10px;background:#fff;border:1px solid var(--line);padding:4px 8px;border-radius:6px}
+
+/* ── Dialog ── */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(20,18,12,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.scrim[data-open="true"]{display:flex}
+.dialog{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.tick{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background:var(--brand);color:#16150f;display:grid;place-items:center;font-size:24px;font-weight:700}
+.dialog[data-kind="warn"] .tick{background:#fbe3a6}
+.dialog h2{margin:0 0 8px;font-size:19px}
+.dialog p{color:var(--muted);margin:0 0 14px;text-align:left}
+.dialog code{display:block;background:var(--brand-tint);border:1px solid var(--brand-line);border-radius:8px;padding:9px;margin:0 0 16px;word-break:break-all;font-size:12.5px;user-select:all}
+.acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* ── View mode (/p/REF) ── */
+body[data-mode="view"] .composer,body[data-mode="view"] .tabs,
+body[data-mode="view"] .stage-tools,body[data-mode="view"] .topbar .btn:not(#btn-pdf){display:none!important}
+body[data-mode="view"] .shell{display:block}
+body[data-mode="view"] .stage{position:static;height:auto;overflow:visible}
+
+/* ── Phones and tablets ── */
+@media (max-width:1000px){
+  .tabs{display:flex;top:0}
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .composer{border-right:0;padding:16px 16px 80px}
+  .stage{position:static;height:auto;padding:16px}
+  body[data-view="form"] .stage{display:none}
+  body[data-view="preview"] .composer{display:none}
+  body[data-mode="view"] .stage{display:block}
+  /* buttons wrap under the logo so Submit is never off screen */
+  .topbar{position:static;height:auto;flex-wrap:wrap;padding:10px 16px}
+  .topbar .logo{flex:1 0 100%}
+  .topbar .sub,.topbar .spacer{display:none}
+}
+@media (max-width:560px){
+  .row,.row.thirds{grid-template-columns:1fr}
+  .btn{padding:6px 10px;font-size:12px}
+}
+
+/* ── Print = the PDF ── */
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff}
+  .topbar,.tabs,.composer,.stage-tools,.scrim,.vidwrap,.state{display:none!important}
+  .shell{display:block}
+  .stage{display:block!important;position:static;height:auto;overflow:visible;padding:0}
+  .sheet-box{width:auto!important;height:auto!important;overflow:visible}
+  .sheet-scaler{transform:none!important}
+  #sheet{box-shadow:none;min-height:297mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="logo" aria-label="Careers home"><img id="top-logo" alt="" hidden><b id="top-name">ASSISTRA</b></a>
+  <div class="sub">Applicant profile builder</div>
+  <div class="spacer"></div>
+  <button class="btn" id="btn-save">Save draft</button>
+  <button class="btn" id="btn-load">Open draft</button>
+  <button class="btn" id="btn-pdf">Download PDF</button>
+  <button class="btn" id="btn-share" hidden>Get profile link</button>
+  <button class="btn primary" id="btn-apply" hidden>Submit application</button>
+  <button class="btn primary" id="btn-update" hidden>Save changes</button>
+  <input type="file" id="file-draft" accept="application/json,.json" hidden>
+</div>
+
+<div class="tabs">
+  <button id="tab-form" aria-pressed="true">Fill the form</button>
+  <button id="tab-prev" aria-pressed="false">See my profile</button>
+</div>
+
+<div class="scrim" id="scrim">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <div class="tick" id="dlg-icon">&#10003;</div>
+    <h2 id="dlg-title"></h2>
+    <p id="dlg-msg"></p>
+    <code id="dlg-code"></code>
+    <div class="acts">
+      <button class="btn" id="dlg-close">Keep editing</button>
+      <button class="btn primary" id="dlg-action">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <form class="composer" id="form" autocomplete="on" novalidate>
+    <div id="job-banner" hidden></div>
+    <p class="intro">Fill this in once. Your answers build an Assistra profile in the panel beside you, in the same format every client sees, so you're compared on your work, not your formatting. Save a draft any time and come back to it.</p>
+
+    <fieldset>
+      <legend>About you</legend>
+      <div class="photo-row">
+        <img class="photo-prev" id="photo-prev" alt="">
+        <label class="f" style="margin:0;flex:1">
+          <span>Headshot <em class="hint">optional, but clients open these first</em></span>
+          <input type="file" id="photo" accept="image/*">
+        </label>
+      </div>
+      <label class="f"><span>Full name</span><input type="text" data-f="name" autocomplete="name" placeholder="Ana Reyes Villanueva"></label>
+      <label class="f"><span>Professional headline <em class="hint">what you do, in one line</em></span>
+        <input type="text" data-f="headline" placeholder="Executive Assistant &amp; Operations Support for US founders"></label>
+      <div class="row">
+        <label class="f"><span>City, province</span><input type="text" data-f="city" placeholder="Cebu City, Cebu"></label>
+        <label class="f"><span>Your timezone</span><input type="text" data-f="tz" placeholder="PHT (GMT+8)"></label>
+      </div>
+      <div class="row thirds">
+        <label class="f"><span>Email</span><input type="email" data-f="email" autocomplete="email" placeholder="ana@email.com"></label>
+        <label class="f"><span>Mobile</span><input type="tel" data-f="phone" autocomplete="tel" placeholder="+63 917 000 0000"></label>
+        <label class="f"><span>LinkedIn <em class="hint">optional</em></span><input type="text" data-f="linkedin" placeholder="linkedin.com/in/ana"></label>
+      </div>
+      <p class="intro lock">&#128274; Your email, mobile, LinkedIn and rate go to the Assistra team only. They are never shown on your profile or its link.</p>
+      <label class="f"><span>Summary <em class="hint">3–4 sentences: who you support, what you take off their plate, one result</em></span>
+        <textarea data-f="summary" placeholder="I keep busy founders out of their inbox and calendar..."></textarea></label>
+      <label class="f"><span>Intro video link <em class="hint">Loom or YouTube, clients watch this first</em></span>
+        <input type="text" data-f="video" placeholder="https://www.loom.com/share/..."></label>
+      <p class="intro" style="margin:-4px 0 0;font-size:12.5px">
+        Two minutes filmed on your phone is fine: who you are, what you do, and why you want this kind of work.
+        Record free on <a href="https://www.loom.com/" target="_blank" rel="noopener">Loom</a>, or upload to YouTube as
+        <b>Unlisted</b> and paste the link. Don't set it to Private, or we won't be able to open it.
+      </p>
+      <label class="f" style="margin-top:12px"><span>Portfolio link <em class="hint">optional: Google Drive, Canva, Behance, your website</em></span>
+        <input type="text" data-f="portfolio" placeholder="https://"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>How you work</legend>
+      <div class="row">
+        <label class="f"><span>Hours available weekly</span>
+          <select data-f="hours">
+            <option value="">Select…</option>
+            <option>Full-time — 40 hrs/week</option>
+            <option>Part-time — 20 hrs/week</option>
+            <option>Part-time — 30 hrs/week</option>
+            <option>Project-based / flexible</option>
+          </select></label>
+        <label class="f"><span>Client hours you can cover</span><input type="text" data-f="overlap" placeholder="9am–5pm US Eastern"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Earliest start date</span>
+          <select data-f="start" id="start-sel">
+            <option value="">Choose one</option>
+            <option>Immediately</option>
+            <option>1 week notice</option>
+            <option>2 weeks notice</option>
+            <option>1 month notice</option>
+            <option value="__date">A specific date…</option>
+          </select>
+          <input type="date" id="start-date" hidden style="margin-top:8px" aria-label="Start date"></label>
+        <label class="f"><span>Expected monthly rate (<span id="cur-label">USD</span>) <em class="hint">optional, Assistra only</em></span>
+          <input type="text" data-f="rate" inputmode="numeric" placeholder="e.g. 1,200"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Internet speed</span><input type="text" data-f="internet" placeholder="80 Mbps fiber"></label>
+        <label class="f"><span>Backup connection &amp; power</span><input type="text" data-f="backup" placeholder="Pocket WiFi + UPS"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>English proficiency</span>
+          <select data-f="english">
+            <option value="">Select…</option>
+            <option>Native / bilingual</option>
+            <option>Fluent — C2</option>
+            <option>Advanced — C1</option>
+            <option>Upper intermediate — B2</option>
+          </select></label>
+        <label class="f"><span>Home office setup</span><input type="text" data-f="office" placeholder="Private room, dual monitors, headset"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Skills &amp; tools</legend>
+      <label class="f"><span>Core services <em class="hint">type and press Enter</em></span>
+        <div class="chips" data-chips="skills"><input type="text" placeholder="Calendar management"></div></label>
+      <label class="f" style="margin-top:12px"><span>Tools you know <em class="hint">add "Tool — level" to show proficiency</em></span>
+        <div class="chips" data-chips="tools"><input type="text" placeholder="HubSpot — advanced"></div></label>
+      <label class="f" style="margin-top:12px"><span>Languages</span>
+        <div class="chips" data-chips="languages"><input type="text" placeholder="Filipino — native"></div></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Experience</legend>
+      <div id="exp-list"></div>
+      <button type="button" class="add" data-add="experience">+ Add a role</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Education &amp; certificates</legend>
+      <div id="edu-list"></div>
+      <button type="button" class="add" data-add="education">+ Add education or a certificate</button>
+    </fieldset>
+
+    <fieldset id="brand-panel">
+      <legend>Agency branding <em class="hint" style="text-transform:none;letter-spacing:0">— staff only</em></legend>
+      <div class="photo-row">
+        <img class="photo-prev" id="logo-prev" style="width:96px;height:40px;border-radius:6px;object-fit:contain;background:#16150f" alt="">
+        <label class="f" style="margin:0;flex:1">
+          <span>Logo <em class="hint">PNG with transparent background, shown on dark</em></span>
+          <input type="file" id="logo" accept="image/*">
+        </label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Agency name</span><input type="text" data-f="agName"></label>
+        <label class="f"><span>Brand colour</span><input type="text" data-f="agBrand"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span>Website</span><input type="text" data-f="agSite"></label>
+        <label class="f"><span>Contact email</span><input type="text" data-f="agEmail"></label>
+      </div>
+      <label class="f"><span>Reference prefix <em class="hint">shows on every profile ID</em></span><input type="text" data-f="agPrefix"></label>
+      <label class="f"><span>Screening note <em class="hint">footer line on every profile</em></span><input type="text" data-f="agNote"></label>
+    </fieldset>
+  </form>
+
+  <div class="stage">
+    <div class="stage-tools">
+      <span class="meter"><i id="meter"></i></span>
+      <span id="fillcount">0 of 12 sections complete</span>
+      <span class="spacer"></span>
+      <button class="btn" id="btn-demo" type="button">Load sample</button>
+    </div>
+    <div class="sheet-box" id="sheet-box">
+      <div class="sheet-scaler"><div id="sheet"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ─────────────────────────────────────────────────────────────
+   CONFIG: change these for your agency.
+   ───────────────────────────────────────────────────────────── */
+const CONFIG = {
+  agName:   "Assistra",
+  agBrand:  "#D4AF37",
+  agSite:   "assistrallc.com",
+  agEmail:  "",                 // shown in the profile footer, e.g. hire@assistrallc.com
+  agPrefix: "AST",
+  agNote:   "Skills-tested, reference-checked and ID-verified by Assistra",
+  logo:     "",                 // URL or data: URL of a logo for dark backgrounds; blank shows the name as text
+  currency: "USD",              // rate field: "1200" becomes "US$1,200 / month"
+  careersEmail: "",             // offered as a fallback if submitting fails
+  applyEnabled: true            // false = download-only builder, no server needed
+};
+
+const params   = new URLSearchParams(location.search);
+const STAFF    = params.has("staff");                       // /apply?staff=1 shows branding + share link
+const EDIT_REF = (params.get("edit") || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+const viewRef  = (location.pathname.match(/^\/p\/([A-Za-z0-9-]+)/) || [])[1];
+
+const S = {
+  photo:"", name:"", headline:"", city:"", tz:"", email:"", phone:"", linkedin:"", summary:"", video:"", portfolio:"",
+  job:"", jobTitle:"", reference:"",
+  hours:"", overlap:"", start:"", rate:"", internet:"", backup:"", english:"", office:"",
+  skills:[], tools:[], languages:[], experience:[], education:[],
+  logo:CONFIG.logo, agName:CONFIG.agName, agBrand:CONFIG.agBrand, agSite:CONFIG.agSite,
+  agEmail:CONFIG.agEmail, agPrefix:CONFIG.agPrefix, agNote:CONFIG.agNote
+};
+
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = t => String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const or  = (v,fb) => (v && String(v).trim()) ? esc(v) : '<span class="empty">'+fb+'</span>';
+const safeImg = v => /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,/i.test(v||"") || /^https?:\/\//i.test(v||"") || /^\/[^/]/.test(v||"") ? v : "";
+$("#cur-label").textContent = CONFIG.currency;
+
+/* Dark text shade and pale tints from any brand colour */
+function shades(hex){
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex||"").trim());
+  if (!m) return null;
+  const n = parseInt(m[1],16), r = n>>16, g = (n>>8)&255, b = n&255;
+  const mix = (t,w)=>Math.round(t+(255-t)*w), dk = (t,k)=>Math.round(t*k);
+  const hx = (a,b2,c)=>"#"+[a,b2,c].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,"0")).join("");
+  // Darken until the text shade is readable on white (luminance below ~0.2)
+  let k = .68;
+  const lum = (a,b2,c)=>(.2126*a+.7152*b2+.0722*c)/255;
+  while (k > .3 && lum(dk(r,k),dk(g,k),dk(b,k)) > .32) k -= .04;
+  return { brand:hx(r,g,b), text:hx(dk(r,k),dk(g,k),dk(b,k)), tint:hx(mix(r,.93),mix(g,.93),mix(b,.93)), line:hx(mix(r,.78),mix(g,.78),mix(b,.78)) };
+}
+
+/* Reference shown on the sheet. Once the server has issued one, it sticks. */
+function profileId(){
+  if (EDIT_REF) return EDIT_REF;
+  if (S.reference) return S.reference;
+  const seed = (S.name||"unnamed").toLowerCase().replace(/\s/g,"");
+  let h = 0;
+  for (let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
+  const d = new Date();
+  const ym = String(d.getFullYear()).slice(2) + String(d.getMonth()+1).padStart(2,"0");
+  const pre = (S.agPrefix||"REF").toUpperCase().replace(/[^A-Z0-9]/g,"") || "REF";
+  return pre+"-"+ym+"-"+h.toString(16).toUpperCase().padStart(4,"0").slice(-4);
+}
+
+/* ── Plain fields ── */
+$$("[data-f]").forEach(el=>{
+  el.value = S[el.dataset.f] || "";
+  const on = ()=>{ S[el.dataset.f] = el.value; render(); autosave(); };
+  el.addEventListener("input", on); el.addEventListener("change", on);
+});
+
+/* ── Images ── */
+function readImage(input, apply){
+  input.addEventListener("change", e=>{
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ()=> apply(r.result);
+    r.readAsDataURL(f);
+  });
+}
+/* Phone photos can be 10 MB+. Resize to 1600 px on the long side as JPEG before anything is saved,
+   and keep stepping the quality down until it's under ~1.2 MB so a submission fits the host's request limit. */
+function shrinkPhoto(dataUrl, done){
+  const img = new Image();
+  img.onload = ()=>{
+    const max = 1600, k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    if (k === 1 && dataUrl.length < 1.2e6){ done(dataUrl); return; }
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth*k); c.height = Math.round(img.naturalHeight*k);
+    const g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0,0,c.width,c.height);
+    g.drawImage(img,0,0,c.width,c.height);
+    let q = .88, out = c.toDataURL("image/jpeg", q);
+    while (out.length > 1.2e6 && q > .4){ q -= .12; out = c.toDataURL("image/jpeg", q); }
+    done(out);
+  };
+  img.onerror = ()=> alert("That file isn't an image we can read. Try a JPG or PNG.");
+  img.src = dataUrl;
+}
+readImage($("#photo"), d=> shrinkPhoto(d, small=>{ S.photo = small; $("#photo-prev").src = small; render(); autosave(); }));
+readImage($("#logo"),  d=>{ S.logo = d; render(); });
+
+/* ── Chips ── */
+function drawChips(box){
+  const key = box.dataset.chips, input = box.querySelector("input");
+  $$(".chip", box).forEach(c=>c.remove());
+  S[key].forEach((val,i)=>{
+    const c = document.createElement("span");
+    c.className = "chip";
+    c.innerHTML = esc(val)+'<button type="button" aria-label="Remove '+esc(val)+'">&times;</button>';
+    c.querySelector("button").onclick = ()=>{ S[key].splice(i,1); drawChips(box); render(); autosave(); };
+    box.insertBefore(c, input);
+  });
+}
+$$("[data-chips]").forEach(box=>{
+  const key = box.dataset.chips, input = box.querySelector("input");
+  const commit = ()=>{
+    input.value.split(",").map(v=>v.trim()).filter(Boolean).forEach(v=>{ if (!S[key].includes(v)) S[key].push(v); });
+    input.value = ""; drawChips(box); render(); autosave();
+  };
+  input.addEventListener("keydown", e=>{
+    if (e.key==="Enter"||e.key===","){ e.preventDefault(); commit(); }
+    else if (e.key==="Backspace" && !input.value && S[key].length){ S[key].pop(); drawChips(box); render(); autosave(); }
+  });
+  input.addEventListener("blur", commit);
+  box.addEventListener("click", e=>{ if (e.target===box) input.focus(); });
+});
+
+/* ── Repeating sections ── */
+const REPEAT = {
+  experience:{
+    host:"#exp-list", label:"Role",
+    blank:()=>({role:"",company:"",period:"",bullets:""}),
+    fields:[
+      {k:"role",    l:"Job title", ph:"Executive Assistant"},
+      {k:"company", l:"Company &amp; location", ph:"Brightline Studio — Denver, CO (remote)"},
+      {k:"period",  l:"Dates", ph:"Mar 2022 – present"},
+      {k:"bullets", l:'What you did <em class="hint">one per line, lead with the result</em>', ph:"Brought the founder's inbox from 400 unread to zero daily", area:true}
+    ]
+  },
+  education:{
+    host:"#edu-list", label:"Entry",
+    blank:()=>({title:"",school:"",year:""}),
+    fields:[
+      {k:"title",  l:"Degree or certificate", ph:"BS Business Administration"},
+      {k:"school", l:"School or issuer", ph:"University of San Carlos"},
+      {k:"year",   l:"Year", ph:"2019"}
+    ]
+  }
+};
+function drawRepeat(key){
+  const cfg = REPEAT[key], host = $(cfg.host);
+  host.innerHTML = "";
+  S[key].forEach((item,i)=>{
+    const wrap = document.createElement("div");
+    wrap.className = "repeat";
+    let html = '<div class="repeat-head"><b>'+cfg.label+' '+(i+1)+'</b><button type="button" class="link" data-del>Remove</button></div>';
+    cfg.fields.forEach(f=>{
+      const v = esc(item[f.k]);
+      html += '<label class="f"><span>'+f.l+'</span>'
+        + (f.area ? '<textarea data-k="'+f.k+'" placeholder="'+esc(f.ph)+'">'+v+'</textarea>'
+                  : '<input type="text" data-k="'+f.k+'" value="'+v+'" placeholder="'+esc(f.ph)+'">')
+        + '</label>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelector("[data-del]").onclick = ()=>{ S[key].splice(i,1); drawRepeat(key); render(); autosave(); };
+    $$("[data-k]", wrap).forEach(inp=> inp.addEventListener("input", ()=>{ S[key][i][inp.dataset.k] = inp.value; render(); autosave(); }));
+    host.appendChild(wrap);
+  });
+}
+$$("[data-add]").forEach(b=> b.onclick = ()=>{
+  const key = b.dataset.add;
+  S[key].push(REPEAT[key].blank());
+  drawRepeat(key); render();
+  const last = $(REPEAT[key].host).lastElementChild;
+  if (last) last.querySelector("input,textarea").focus();
+});
+
+/* ── Links ── */
+function linkUrl(raw){
+  const u = String(raw||"").trim();
+  if (!u) return "";
+  if (/^https?:\/\//i.test(u)) return u;
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(u)) return "https://"+u;
+  return "";
+}
+/* Only Loom and YouTube become players; anything else stays a plain link. */
+function embedUrl(raw){
+  const u = String(raw||"").trim(); let m;
+  if ((m = u.match(/loom\.com\/(?:share|embed)\/([0-9a-f]{20,})/i))) return "https://www.loom.com/embed/"+m[1];
+  if ((m = u.match(/youtu\.be\/([A-Za-z0-9_-]{11})/))) return "https://www.youtube-nocookie.com/embed/"+m[1];
+  if ((m = u.match(/youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/))) return "https://www.youtube-nocookie.com/embed/"+m[1];
+  return null;
+}
+
+/* ── Render the A4 sheet ── */
+function render(){
+  const c = shades(S.agBrand);
+  if (c){
+    const rs = document.documentElement.style;
+    rs.setProperty("--brand", c.brand); rs.setProperty("--brand-text", c.text);
+    rs.setProperty("--brand-tint", c.tint); rs.setProperty("--brand-line", c.line);
+  }
+  const logo = safeImg(S.logo);
+  $("#top-name").textContent = (S.agName||"").toUpperCase();
+  $("#top-logo").hidden = !logo; $("#top-name").hidden = !!logo;
+  if (logo){ $("#top-logo").src = logo; const lp = $("#logo-prev"); if (lp) lp.src = logo; }
+
+  // Contact details, LinkedIn and rate never go on the sheet: the sheet is what clients see.
+  const meta = [S.city,S.tz].filter(Boolean).map(v=>"<span>"+esc(v)+"</span>").join("");
+  const vUrl = linkUrl(S.video), pUrl = linkUrl(S.portfolio);
+  const videoLine = vUrl ? '<p class="sh-link">&#9654; Intro video — <a href="'+esc(vUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(S.video)+'</a></p>' : "";
+  const portLine  = pUrl ? '<p class="sh-link">&#128193; Portfolio — <a href="'+esc(pUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(S.portfolio)+'</a></p>' : "";
+
+  const strip = [
+    ["Availability",[S.hours,S.overlap].filter(Boolean).join(" · ")||"—"],
+    ["Can start",   S.start||"—"],
+    ["Connection",  [S.internet,S.backup].filter(Boolean).join(" · ")||"—"],
+    ["English",     S.english||"—"]
+  ].map(([k,v])=>"<div><dt>"+k+"</dt><dd>"+esc(v)+"</dd></div>").join("");
+
+  const jobs = S.experience.filter(j=>j.role||j.company).map(j=>{
+    const lis = (j.bullets||"").split("\n").map(s=>s.replace(/^[-•*]\s*/,"").trim()).filter(Boolean).map(s=>"<li>"+esc(s)+"</li>").join("");
+    return '<div class="job"><div class="jt"><p class="jr">'+or(j.role,"Job title")+'</p><span class="jp">'+esc(j.period)+'</span></div>'
+      + (j.company?'<p class="jc">'+esc(j.company)+'</p>':'') + (lis?'<ul>'+lis+'</ul>':'') + '</div>';
+  }).join("");
+
+  const edu = S.education.filter(e=>e.title||e.school).map(e=>
+    '<div class="edu"><b>'+esc(e.title)+'</b><span>'+[e.school,e.year].filter(Boolean).map(esc).join(" · ")+'</span></div>').join("");
+
+  const none = '<p class="empty" style="font-size:9pt;margin:0">Add a few in the form</p>';
+  const tags = a => a.length ? '<div class="tags">'+a.map(t=>"<i>"+esc(t)+"</i>").join("")+'</div>' : none;
+  // "Tool — level" items become a two-column list; without any levels, plain tags take less room.
+  const split = a => {
+    if (!a.length) return none;
+    const parts = a.map(t=>t.split(/\s+[—–-]\s+/));
+    if (!parts.some(p=>p.length>1)) return '<div class="tags">'+parts.map(p=>"<i>"+esc(p[0])+"</i>").join("")+'</div>';
+    return '<ul class="slist">'+parts.map(p=>"<li><span>"+esc(p[0])+"</span>"+(p[1]?"<em>"+esc(p[1])+"</em>":"")+"</li>").join("")+'</ul>';
+  };
+  const photo = safeImg(S.photo);
+
+  $("#sheet").innerHTML = `
+    <div class="sh-band">
+      ${logo ? '<img src="'+esc(logo)+'" alt="'+esc(S.agName)+'">' : '<span class="wm">'+esc((S.agName||"").toUpperCase())+'</span>'}
+      <div class="id">Profile reference<b>${esc(profileId())}</b></div>
+    </div>
+    <div class="sh-id">
+      ${photo ? '<img class="face" src="'+esc(photo)+'" alt="">' : ''}
+      <div style="flex:1;min-width:0">
+        <h1 class="sh-name">${or(S.name,"Your name")}</h1>
+        <p class="sh-role">${or(S.headline,"Your professional headline")}</p>
+        <div class="sh-meta">${meta||'<span class="empty">City · timezone</span>'}</div>
+        ${videoLine}${portLine}
+      </div>
+    </div>
+    <dl class="strip">${strip}</dl>
+    <div class="sh-body">
+      <div>
+        <h3 class="sec">Profile</h3>
+        <p class="summary">${or(S.summary,"Your summary will appear here: three or four sentences on who you support and what you take off their plate.")}</p>
+        <h3 class="sec">Experience</h3>
+        ${jobs||'<p class="empty" style="font-size:9pt">Add your roles in the form</p>'}
+        ${edu?'<h3 class="sec">Education &amp; certificates</h3>'+edu:''}
+      </div>
+      <div>
+        <h3 class="sec">Core services</h3>${tags(S.skills)}
+        <h3 class="sec">Tools</h3>${split(S.tools)}
+        <h3 class="sec">Languages</h3>${split(S.languages)}
+        ${S.office?'<h3 class="sec">Home office</h3><p class="summary" style="font-size:9pt">'+esc(S.office)+'</p>':''}
+      </div>
+    </div>
+    <div class="sh-foot">
+      ${logo ? '' : '<span class="seal">&#10003;</span>'}
+      <b>${esc(S.agName)} verified</b>
+      <span class="grow">${esc(S.agNote)}</span>
+      <span>${[S.agSite,S.agEmail].filter(Boolean).map(esc).join(" · ")}</span>
+    </div>`;
+  scale(); progress();
+}
+
+function scale(){
+  const box = $("#sheet-box"), sheet = $("#sheet");
+  if (!box || !sheet.offsetWidth) return;
+  const avail = box.parentElement.clientWidth - 8;
+  const z = Math.min(1, avail / 794);
+  document.documentElement.style.setProperty("--z", z);
+  box.style.width  = (794*z)+"px";
+  box.style.height = (sheet.offsetHeight*z)+"px";
+}
+addEventListener("resize", scale);
+
+function progress(){
+  const checks = [S.name,S.headline,S.city,S.email,S.summary,S.hours,S.overlap,
+                  S.internet,S.english,S.skills.length,S.tools.length,S.experience.some(e=>e.role)];
+  const n = checks.filter(Boolean).length;
+  $("#fillcount").textContent = n+" of "+checks.length+" sections complete";
+  $("#meter").style.width = (n/checks.length*100)+"%";
+}
+
+/* ── Drafts: a JSON file, plus an automatic copy in this browser ── */
+const DRAFT_KEY = "applicant-draft-v1";
+let saveTimer = null;
+function writeDraft(){
+  clearTimeout(saveTimer); saveTimer = null;
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); }catch(e){ /* full or blocked: the JSON download still works */ }
+}
+function autosave(){
+  if (viewRef || EDIT_REF) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(writeDraft, 400);
+}
+addEventListener("pagehide", ()=>{ if (saveTimer) writeDraft(); });
+$("#btn-save").onclick = ()=>{
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (S.name||"applicant").toLowerCase().replace(/[^a-z0-9]+/g,"-")+"-draft.json";
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+};
+$("#btn-load").onclick = ()=> $("#file-draft").click();
+$("#file-draft").onchange = e=>{
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{ try{ hydrate(JSON.parse(r.result)); autosave(); }catch(err){ alert("That file isn't a saved draft from this form."); } };
+  r.readAsText(f); e.target.value = "";
+};
+$("#btn-pdf").onclick = ()=>{
+  const was = document.body.dataset.view;
+  document.title = (S.name ? S.name+" — " : "") + S.agName + " profile";
+  window.print();
+  if (was) view(was);
+};
+
+/* ── Checks before sending ── */
+const REQUIRED = [
+  ["name","your full name"], ["email","your email address"],
+  ["headline","a professional headline"], ["summary","a short summary"],
+  ["hours","your weekly availability"], ["english","your English level"],
+  ["internet","your internet speed"], ["video","a link to your intro video"]
+];
+function gaps(){
+  const out = [];
+  for (const [k,label] of REQUIRED) if (!String(S[k]||"").trim()) out.push(label);
+  if (S.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email.trim())) out.push("a valid email address");
+  const v = String(S.video||"").trim();
+  if (v && !/^https?:\/\//i.test(v)) out.push("a full video link starting with https:// (a Loom or YouTube address)");
+  if (!S.skills.length) out.push("at least one core service");
+  if (!S.experience.some(e=>e.role)) out.push("at least one role under Experience");
+  return out;
+}
+function showGaps(g, verb){
+  openDialog({ kind:"warn", title:"Not quite finished",
+    msg:"Before you "+verb+", please add:\n\n• "+g.join("\n• "),
+    action:"Back to the form",
+    onAction:()=>{ closeDialog(); if (innerWidth <= 1000) view("form"); } });
+}
+function showError(msg){
+  let box = $("#send-err");
+  if (!box){ box = document.createElement("p"); box.id = "send-err"; box.className = "err"; $("#form").prepend(box); }
+  box.textContent = msg;
+  if (innerWidth <= 1000) view("form");
+  box.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+/* Monthly rate: "1200", "$1,200", "USD 1200/month" all become "US$1,200 / month". Anything else is kept as typed. */
+function normRate(v){
+  const t = String(v||"").trim(), cur = CONFIG.currency.toUpperCase();
+  const sym = {USD:"US$",AUD:"A$",PHP:"₱",GBP:"£",EUR:"€",CAD:"C$"}[cur] || cur+" ";
+  const m = t.match(/^(?:[a-z]{1,3}\$|[a-z]{3}|₱|£|€)?\s*\$?\s*([\d,]+(?:\.\d{1,2})?)\s*(?:[a-z]{3})?\s*(?:\/\s*(?:month|mo|mth)|per\s+month|a\s+month|monthly)?$/i);
+  if (!m) return t;
+  const n = Math.round(parseFloat(m[1].replace(/,/g,"")));
+  return isFinite(n) && n > 0 ? sym + n.toLocaleString("en-US") + " / month" : t;
+}
+function payload(applied){
+  S.rate = normRate(S.rate);
+  const rb = $('[data-f="rate"]'); if (rb) rb.value = S.rate;
+  const p = Object.assign({}, S, { reference: profileId(), applied: Boolean(applied) });
+  delete p.logo;
+  return p;
+}
+async function postProfile(applied){
+  const res = await fetch("/api/profile", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload(applied)) });
+  const out = await res.json().catch(()=>({ok:false, error:"The server sent an unexpected reply."}));
+  if (!res.ok || !out.ok) throw new Error(out.error || "The server rejected the profile.");
+  S.reference = out.reference; render(); autosave();
+  return out;
+}
+const applyLabel = ()=> S.jobTitle ? "Apply for this role" : "Submit application";
+
+if (CONFIG.applyEnabled){
+  const btn = $("#btn-apply");
+  btn.hidden = false;
+  btn.onclick = async ()=>{
+    const g = gaps(); if (g.length){ showGaps(g, "submit"); return; }
+    const err = $("#send-err"); if (err) err.remove();
+    btn.disabled = true; btn.textContent = "Submitting…";
+    try{
+      const out = await postProfile(true);
+      openDialog({
+        title: S.jobTitle ? "Applied for " + S.jobTitle : "Application submitted",
+        msg: "Our recruitment team reviews every application within two business days, and we'll email you either way. "
+           + "Your reference is " + out.reference + ". The link below is your profile; come back to it any time.",
+        code: out.url, action:"Download my PDF",
+        onAction:()=>{ closeDialog(); setTimeout(()=>window.print(), 120); }
+      });
+      btn.textContent = "Application sent";
+      return;                     // stays spent so it can't be sent twice
+    }catch(e){
+      showError("That didn't submit: " + e.message + " Check your connection and try again"
+        + (CONFIG.careersEmail ? ", or save a draft and email it to " + CONFIG.careersEmail + "." : ", or save a draft so nothing is lost."));
+    }
+    btn.disabled = false; btn.textContent = applyLabel();
+  };
+}
+
+/* Staff: the same record, but framed as a shareable link rather than an application. */
+if (CONFIG.applyEnabled && STAFF){
+  const btn = $("#btn-share");
+  btn.hidden = false;
+  btn.onclick = async ()=>{
+    const g = gaps(); if (g.length){ showGaps(g, "get the link"); return; }
+    const err = $("#send-err"); if (err) err.remove();
+    btn.disabled = true; btn.textContent = "Creating…";
+    try{
+      const out = await postProfile(false);
+      openDialog({
+        title:"Share link ready",
+        msg:"This is the profile page. Share it with a client or keep it as an online CV. Press this again after any edit and the same address updates. "
+          + "A link is not an application: use Submit if this person is applying for a role.",
+        code: out.url, action:"Copy link",
+        onAction: async ()=>{
+          try{ await navigator.clipboard.writeText(out.url); $("#dlg-action").textContent = "Copied"; }
+          catch{ $("#dlg-action").textContent = "Select the link above to copy"; }
+        }
+      });
+    }catch(e){ showError("Couldn't create the link: " + e.message); }
+    btn.disabled = false; btn.textContent = "Get profile link";
+  };
+}
+
+/* ── Dialog ── */
+let dialogAction = ()=>{};
+function openDialog({title, msg, code, action, onAction, kind}){
+  $(".dialog").dataset.kind = kind || "ok";
+  $("#dlg-icon").innerHTML = kind === "warn" ? "!" : "&#10003;";
+  $("#dlg-title").textContent = title;
+  $("#dlg-msg").textContent = msg; $("#dlg-msg").style.whiteSpace = "pre-line";
+  $("#dlg-code").textContent = code || ""; $("#dlg-code").style.display = code ? "" : "none";
+  $("#dlg-action").textContent = action;
+  dialogAction = onAction;
+  $("#scrim").dataset.open = "true";
+  $("#dlg-close").focus();
+}
+const closeDialog = ()=>{ $("#scrim").dataset.open = "false"; };
+$("#dlg-action").onclick = ()=> dialogAction();
+$("#dlg-close").onclick = closeDialog;
+$("#scrim").addEventListener("click", e=>{ if (e.target === $("#scrim")) closeDialog(); });
+addEventListener("keydown", e=>{ if (e.key==="Escape" && $("#scrim").dataset.open==="true") closeDialog(); });
+
+/* ── Earliest start: fixed choices or a calendar date ── */
+function startOption(v){
+  const sel = $("#start-sel"); if (!sel || !v || v === "__date") return;
+  if ([...sel.options].some(o=>o.value===v)) return;
+  const o = document.createElement("option"); o.value = o.textContent = v;
+  sel.insertBefore(o, sel.querySelector('[value="__date"]'));
+}
+(()=>{
+  const sel = $("#start-sel"), date = $("#start-date");
+  date.min = new Date().toISOString().slice(0,10);
+  sel.addEventListener("change", ()=>{
+    if (sel.value !== "__date"){ date.hidden = true; return; }
+    S.start = ""; date.hidden = false; date.focus();
+    try{ date.showPicker(); }catch(e){}
+    render();
+  });
+  date.addEventListener("change", ()=>{
+    if (!date.value) return;
+    const v = new Date(date.value+"T00:00:00").toLocaleDateString("en-US",{day:"numeric",month:"short",year:"numeric"});
+    startOption(v); sel.value = v; S.start = v; date.hidden = true;
+    render(); autosave();
+  });
+})();
+
+/* ── Load data into the form ── */
+function hydrate(data){
+  Object.keys(S).forEach(k=>{ if (k in data && data[k] != null) S[k] = data[k]; });
+  ["skills","tools","languages","experience","education"].forEach(k=>{ if (!Array.isArray(S[k])) S[k] = []; });
+  startOption(S.start);
+  $$("[data-f]").forEach(el=>{ el.value = S[el.dataset.f] ?? ""; });
+  if (S.photo) $("#photo-prev").src = safeImg(S.photo);
+  $$("[data-chips]").forEach(drawChips);
+  drawRepeat("experience"); drawRepeat("education");
+  render();
+}
+
+/* ── Applying for a specific role: /apply?job=slug ── */
+(async ()=>{
+  const slug = params.get("job");
+  if (!slug || viewRef || EDIT_REF) return;
+  S.job = slug;
+  try{
+    const res = await fetch("/api/jobs/"+encodeURIComponent(slug));
+    const out = await res.json();
+    const j = out.job || out;
+    if (!res.ok || out.ok === false || !j || !j.title) return;
+    S.jobTitle = j.title;
+    const b = $("#job-banner");
+    b.innerHTML = '<b>You are applying for</b><span>'+esc(j.title)+'</span><a href="/jobs/'+encodeURIComponent(slug)+'">Read the role again →</a>';
+    b.hidden = false;
+    const ab = $("#btn-apply"); if (ab && !ab.disabled) ab.textContent = applyLabel();
+  }catch(e){ /* no title is fine: they can still apply */ }
+})();
+
+/* ── Public profile page: /p/REF ── */
+function webCard(title, inner){
+  const wrap = document.createElement("div");
+  wrap.className = "vidwrap";
+  wrap.innerHTML = '<div class="vidcard"><h2>'+title+'</h2>'+inner+'</div>';
+  $("#sheet-box").insertAdjacentElement("beforebegin", wrap);
+}
+async function viewMode(ref){
+  document.body.dataset.mode = "view";
+  const box = $("#sheet-box");
+  box.insertAdjacentHTML("beforebegin", '<div class="state" id="loading"><b>Loading profile</b>One moment.</div>');
+  box.style.visibility = "hidden";
+  const fail = (h, d)=>{ $("#loading").innerHTML = "<b>"+esc(h)+"</b>"+esc(d)+"<br><code>"+esc(ref)+"</code>"; box.remove(); };
+  try{
+    const res = await fetch("/api/profile/"+encodeURIComponent(ref));
+    const out = await res.json();
+    if (!res.ok || out.ok === false){
+      fail("Profile not available", res.status === 404 ? "This link may have been replaced or removed. Ask us for a current one." : (out.error || "Something went wrong."));
+      return;
+    }
+    hydrate(out.profile);
+    $("#loading").remove(); box.style.visibility = "";
+    document.title = (S.name ? S.name+" — " : "") + S.agName + " profile";
+    const v = linkUrl(S.video), src = embedUrl(S.video);
+    if (v) webCard("Introduction video", src
+      ? '<div class="frame"><iframe src="'+esc(src)+'" allowfullscreen allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" title="Introduction video"></iframe></div>'
+      : '<p class="fallback">Watch at <a href="'+esc(v)+'" target="_blank" rel="noopener noreferrer">'+esc(S.video)+'</a></p>');
+    const p = linkUrl(S.portfolio);
+    if (p){
+      const first = (S.name||"").trim().split(/\s+/)[0];
+      webCard("Portfolio", '<p class="fallback">See examples of '+(first?esc(first)+"'s":"their")+' work: <a href="'+esc(p)+'" target="_blank" rel="noopener noreferrer"><b>Open portfolio &#8599;</b></a></p>');
+    }
+    scale();
+  }catch(e){ fail("Couldn't load this profile", "Check your connection and refresh."); }
+}
+
+/* ── Staff editing a candidate: /apply?edit=REF (needs the console sign-in) ── */
+async function editMode(ref){
+  ["#btn-apply","#btn-share","#btn-save","#btn-load"].forEach(id=>{ const b=$(id); if (b) b.hidden = true; });
+  const banner = $("#job-banner");
+  const say = html=>{ banner.innerHTML = html; banner.hidden = false; };
+  say('<b>Loading '+esc(ref)+'…</b>');
+  let a;
+  try{
+    const res = await fetch("/api/admin/applicants/"+encodeURIComponent(ref), {credentials:"same-origin"});
+    const out = await res.json().catch(()=>({}));
+    if (res.status === 401){ say('<b>Sign in first</b><span>Open the <a href="/admin" target="_blank">recruitment console</a>, sign in, then refresh this page.</span>'); return; }
+    if (!res.ok || !out.applicant) throw new Error(out.error || "Couldn't load that candidate.");
+    a = out.applicant;
+  }catch(e){ say('<b>Couldn\'t load '+esc(ref)+'</b><span>'+esc(e.message)+'</span>'); return; }
+
+  hydrate(a);
+  if (!S.experience.length){ S.experience.push(REPEAT.experience.blank()); drawRepeat("experience"); }
+  if (!S.education.length){ S.education.push(REPEAT.education.blank()); drawRepeat("education"); }
+  render();
+  document.title = "Editing " + (a.name || ref);
+  say('<b>Editing as staff</b><span>'+esc(a.name||"")+' · '+esc(ref)
+    + '. Save changes updates their record straight away. Their stage, notes and history stay as they are, and they aren\'t emailed.</span>'
+    + '<a href="/p/'+encodeURIComponent(ref)+'" target="_blank">Open their profile link →</a>');
+
+  let dirty = false;
+  $("#form").addEventListener("input", ()=>{ dirty = true; });
+  addEventListener("beforeunload", e=>{ if (dirty){ e.preventDefault(); e.returnValue = ""; } });
+
+  const btn = $("#btn-update");
+  btn.hidden = false;
+  btn.onclick = async ()=>{
+    if (!String(S.name||"").trim() || !String(S.email||"").trim()){ showError("A name and an email address are needed before saving."); return; }
+    const err = $("#send-err"); if (err) err.remove();
+    btn.disabled = true; btn.textContent = "Saving…";
+    try{
+      const body = payload(Boolean(a.applied));
+      ["reference","applied"].forEach(k=>delete body[k]);
+      const res = await fetch("/api/admin/applicants/"+encodeURIComponent(ref)+"/profile", {
+        method:"PUT", credentials:"same-origin", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) });
+      const out = await res.json().catch(()=>({}));
+      if (res.status === 401) throw new Error("Your console sign-in has expired. Sign in again in another tab, then press Save changes again.");
+      if (!res.ok || !out.ok) throw new Error(out.error || "The server didn't accept the changes.");
+      dirty = false;
+      openDialog({
+        title: out.changed.length ? "Saved" : "Nothing to save",
+        msg: out.changed.length ? "Updated: " + out.changed.join(", ") + ".\nTheir profile link shows the changes now." : "Nothing has changed since it was loaded.",
+        code: location.origin + "/p/" + ref, action: "Back to the console",
+        onAction: ()=>{ location.href = "/admin"; }
+      });
+    }catch(e){ showError("Not saved: " + e.message); }
+    btn.disabled = false; btn.textContent = "Save changes";
+  };
+}
+
+/* ── Sample data ── */
+$("#btn-demo").onclick = ()=>{ loadSample(); autosave(); };
+const loadSample = ()=> hydrate({
+  name:"Ana Reyes Villanueva",
+  headline:"Executive Assistant & Operations Support for US founders, 5 years",
+  city:"Cebu City, Cebu", tz:"PHT (GMT+8)",
+  email:"ana.villanueva@example.com", phone:"+63 917 555 0199", linkedin:"linkedin.com/in/example",
+  video:"https://www.loom.com/share/0123456789abcdef0123456789abcdef",
+  portfolio:"https://drive.google.com/drive/folders/sample",
+  summary:"I run the inbox, calendar and follow-ups for founders so they can stay on revenue work. For five years I've supported US agency and e-commerce owners across Eastern and Pacific time: daily inbox triage, scheduling across several timezones, and the small operational jobs that slip through the cracks. At my last role I cut the founder's weekly admin from 15 hours to under 2.",
+  hours:"Full-time — 40 hrs/week", overlap:"9am–5pm US Eastern",
+  start:"2 weeks notice", rate:"1,200",
+  internet:"100 Mbps fiber", backup:"LTE pocket WiFi + 2-hr UPS",
+  english:"Fluent — C2",
+  office:"Private home office, dual monitors, noise-cancelling headset.",
+  skills:["Inbox management","Calendar & scheduling","Travel booking","Meeting notes","Light bookkeeping","CRM upkeep","Client onboarding","Weekly reporting"],
+  tools:["Google Workspace — advanced","Slack — advanced","HubSpot — intermediate","ClickUp — advanced","QuickBooks — intermediate","Canva — intermediate"],
+  languages:["English — fluent","Filipino — native","Cebuano — native"],
+  experience:[
+    {role:"Executive Assistant", company:"Brightline Studio — Denver, CO (remote)", period:"Mar 2022 – present",
+     bullets:"Brought the founder's inbox from 400+ unread to zero daily within a month\nRun a 15-person calendar across three timezones with few same-day reschedules\nWrote the SOP library now used to onboard every new assistant"},
+    {role:"Virtual Assistant", company:"Harbor & Pine — Austin, TX (remote)", period:"Jul 2020 – Feb 2022",
+     bullets:"Cleaned and maintained a 3,500-contact HubSpot database\nAnswered first-line client email, resolving most without escalation\nReconciled invoices and receipts in QuickBooks for 25 monthly retainers"},
+    {role:"Customer Support Representative", company:"BPO contact centre — Cebu IT Park", period:"Jun 2018 – Jun 2020",
+     bullets:"Supported a US retail account with a 95% quality score\nTrained five new hires on account tools and escalations"}
+  ],
+  education:[
+    {title:"BS Business Administration", school:"University of San Carlos", year:"2018"},
+    {title:"Google Project Management Certificate", school:"Coursera", year:"2023"}
+  ]
+});
+
+/* ── Mobile tabs ── */
+function view(v){
+  document.body.dataset.view = v;
+  $("#tab-form").setAttribute("aria-pressed", v==="form");
+  $("#tab-prev").setAttribute("aria-pressed", v==="preview");
+  if (v==="preview") setTimeout(scale,0);
+}
+$("#tab-form").onclick = ()=>view("form");
+$("#tab-prev").onclick = ()=>view("preview");
+view("form");
+
+/* ── Start ── */
+if (!STAFF){ const p = $("#brand-panel"); if (p) p.remove(); }
+$("#form").addEventListener("submit", e=>e.preventDefault());
+
+/* Bring back the draft this browser saved automatically. The role comes from the
+   URL, not the draft, and outside staff mode the branding always comes from CONFIG. */
+if (!viewRef && !EDIT_REF){
+  try{
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
+    if (d && typeof d === "object"){
+      delete d.job; delete d.jobTitle;
+      if (!STAFF) ["logo","agName","agBrand","agSite","agEmail","agPrefix","agNote"].forEach(k=>delete d[k]);
+      hydrate(d);
+    }
+  }catch(e){}
+}
+if (!S.experience.length) S.experience.push(REPEAT.experience.blank());
+if (!S.education.length)  S.education.push(REPEAT.education.blank());
+drawRepeat("experience"); drawRepeat("education");
+render();
+if (viewRef) viewMode(viewRef);
+else if (EDIT_REF) editMode(EDIT_REF);
+</script>
+</body>
+</html>

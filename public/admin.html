@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Recruitment Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#D4AF37;--brand-text:#7F6921;--tint:#FCF9EF;--line:#e4e0d6;--ink:#1c1b19;--muted:#6c6a66;--bg:#f5f3ee}
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+a{color:var(--brand-text)}
+[hidden]{display:none!important}
+.top{display:flex;align-items:center;gap:10px;background:#16150f;color:#fff;padding:12px 20px;border-bottom:3px solid var(--brand)}
+.top b{color:var(--brand);letter-spacing:.5px}
+.top .sp{flex:1}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;text-decoration:none;font-size:13px;display:inline-block}
+.top .btn{background:transparent;color:#fff;border-color:#4a473d}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#16150f;font-weight:600}
+.btn.danger{color:#b3261e}
+input,select,textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%}
+.login{max-width:360px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}
+.login h1{margin:0 0 14px;font-size:20px}
+.err{color:#b3261e;min-height:20px;margin:8px 0 0}
+.wrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;padding:16px 20px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters input{flex:1 1 200px}.filters select{flex:0 1 180px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:#fbfaf7}
+tr.row{cursor:pointer}tr.row:hover,tr.row.on{background:var(--tint)}
+td small{display:block;color:var(--muted)}
+.pill{display:inline-block;font-size:11.5px;border-radius:999px;padding:2px 8px;background:var(--tint);border:1px solid #f4eacd;color:var(--brand-text);white-space:nowrap}
+.pill.link{background:#eef2f7;border-color:#dbe3ee;color:#3b5372}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.panel h2{margin:0;font-size:18px}
+.panel h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--brand-text);margin:18px 0 6px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-word}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.log{list-style:none;padding:0;margin:0;font-size:13px}
+.log li{padding:6px 0;border-bottom:1px dashed var(--line)}
+.log time{color:var(--muted);font-size:11.5px;display:block}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.face{width:56px;height:56px;border-radius:50%;object-fit:cover;float:right}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}.panel{position:static;max-height:none}.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<div class="top"><b>RECRUITMENT CONSOLE</b><span class="sp"></span>
+  <a class="btn" href="/apply?staff=1" target="_blank">New profile</a>
+  <a class="btn" href="/jobs" target="_blank">Jobs</a>
+  <button class="btn" id="out" hidden>Sign out</button></div>
+
+<form class="login" id="login" hidden>
+  <h1>Staff sign-in</h1>
+  <input type="password" id="pw" placeholder="Password" autocomplete="current-password" required>
+  <p class="err" id="lerr"></p>
+  <button class="btn primary" style="width:100%">Sign in</button>
+</form>
+
+<div class="wrap" id="app" hidden>
+  <div>
+    <div class="filters">
+      <input id="q" placeholder="Search name, email, headline, reference">
+      <select id="fstage"><option value="">All stages</option></select>
+      <select id="fjob"><option value="">All roles</option></select>
+      <select id="ftype"><option value="">Applications &amp; links</option><option value="1">Applications only</option><option value="0">Links only</option></select>
+    </div>
+    <table><thead><tr><th>Candidate</th><th class="hide-sm">Role</th><th>Stage</th><th class="hide-sm">Updated</th></tr></thead><tbody id="rows"></tbody></table>
+  </div>
+  <div class="panel" id="panel"><p class="empty">Pick a candidate to see their details.</p></div>
+</div>
+
+<script>
+"use strict";
+const $ = s=>document.querySelector(s);
+const esc = t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const when = iso=> iso ? new Date(iso).toLocaleString(undefined,{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"}) : "";
+let list = [], stages = [], current = null;
+
+async function api(url, opts){
+  const res = await fetch(url, Object.assign({credentials:"same-origin", headers:{"Content-Type":"application/json"}}, opts||{}));
+  const out = await res.json().catch(()=>({}));
+  if (res.status === 401){ showLogin(); throw new Error("Signed out"); }
+  if (!res.ok || out.ok === false) throw new Error(out.error || "Request failed");
+  return out;
+}
+function showLogin(){ $("#login").hidden = false; $("#app").hidden = true; $("#out").hidden = true; $("#pw").focus(); }
+$("#login").onsubmit = async e=>{
+  e.preventDefault(); $("#lerr").textContent = "";
+  try{
+    const res = await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:$("#pw").value})});
+    const out = await res.json();
+    if (!out.ok) throw new Error(out.error);
+    $("#pw").value = ""; boot();
+  }catch(err){ $("#lerr").textContent = err.message; }
+};
+$("#out").onclick = async ()=>{ await fetch("/api/admin/logout",{method:"POST"}); showLogin(); };
+
+async function boot(){
+  let out; try{ out = await api("/api/admin/applicants"); }catch(e){ return; }
+  list = out.applicants; stages = out.stages;
+  $("#login").hidden = true; $("#app").hidden = false; $("#out").hidden = false;
+  $("#fstage").innerHTML = '<option value="">All stages</option>'+stages.map(s=>"<option>"+esc(s)+"</option>").join("");
+  const roles = [...new Set(list.map(a=>a.jobTitle).filter(Boolean))].sort();
+  $("#fjob").innerHTML = '<option value="">All roles</option><option value="__none">General (no role)</option>'+roles.map(r=>"<option>"+esc(r)+"</option>").join("");
+  draw();
+}
+function draw(){
+  const q = $("#q").value.trim().toLowerCase(), st = $("#fstage").value, jb = $("#fjob").value, ty = $("#ftype").value;
+  const rows = list.filter(a=>
+    (!q || [a.name,a.email,a.headline,a.reference].join(" ").toLowerCase().includes(q)) &&
+    (!st || a.stage === st) &&
+    (!jb || (jb==="__none" ? !a.jobTitle : a.jobTitle === jb)) &&
+    (!ty || String(+!!a.applied) === ty));
+  $("#rows").innerHTML = rows.length ? rows.map(a=>`<tr class="row${current&&current.reference===a.reference?" on":""}" data-ref="${esc(a.reference)}">
+    <td><b>${esc(a.name)}</b><small>${esc(a.headline)}</small><small>${esc(a.reference)}</small></td>
+    <td class="hide-sm">${a.applied ? esc(a.jobTitle||"General application") : '<span class="pill link">Profile link only</span>'}</td>
+    <td><span class="pill">${esc(a.stage||"New")}</span></td>
+    <td class="hide-sm"><small>${esc(when(a.updatedAt))}</small></td></tr>`).join("")
+    : '<tr><td colspan="4" class="empty">No candidates match.</td></tr>';
+  document.querySelectorAll("tr.row").forEach(tr=> tr.onclick = ()=> openCand(tr.dataset.ref));
+}
+["#q","#fstage","#fjob","#ftype"].forEach(s=> $(s).addEventListener("input", draw));
+
+async function openCand(ref){
+  let out; try{ out = await api("/api/admin/applicants/"+encodeURIComponent(ref)); }catch(e){ return; }
+  current = out.applicant; draw(); panel();
+}
+function panel(){
+  const a = current;
+  const kv = (k,v)=> v ? `<dt>${k}</dt><dd>${v}</dd>` : "";
+  const link = u=>{ const s = String(u||"").trim(); if(!s) return ""; const h = /^https?:\/\//i.test(s)?s:"https://"+s; return `<a href="${esc(h)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`; };
+  $("#panel").innerHTML = `
+    ${a.photo?`<img class="face" src="${esc(a.photo)}" alt="">`:""}
+    <h2>${esc(a.name)}</h2><div style="color:var(--muted)">${esc(a.headline)}</div>
+    <div class="acts">
+      <a class="btn" href="/p/${encodeURIComponent(a.reference)}" target="_blank">Open profile</a>
+      <a class="btn" href="/apply?edit=${encodeURIComponent(a.reference)}&staff=1" target="_blank">Edit profile</a>
+      <button class="btn" id="copy">Copy link</button>
+      <button class="btn danger" id="del">Delete</button>
+    </div>
+    <h3>Private details</h3>
+    <dl class="kv">${kv("Reference",esc(a.reference))}${kv("Email",a.email?`<a href="mailto:${esc(a.email)}">${esc(a.email)}</a>`:"")}${kv("Mobile",esc(a.phone))}
+      ${kv("LinkedIn",link(a.linkedin))}${kv("Rate",esc(a.rate))}${kv("Role",esc(a.jobTitle|| (a.applied?"General application":"Profile link only")))}
+      ${kv("First sent",esc(when(a.submittedAt)))}${kv("Updated",esc(when(a.updatedAt)))}</dl>
+    <h3>Work set-up</h3>
+    <dl class="kv">${kv("Location",esc([a.city,a.tz].filter(Boolean).join(" · ")))}${kv("Hours",esc(a.hours))}${kv("Covers",esc(a.overlap))}
+      ${kv("Can start",esc(a.start))}${kv("Internet",esc(a.internet))}${kv("Backup",esc(a.backup))}${kv("English",esc(a.english))}
+      ${kv("Video",link(a.video))}${kv("Portfolio",link(a.portfolio))}</dl>
+    <h3>Stage</h3>
+    <select id="stage">${stages.map(s=>`<option${s===(a.stage||"New")?" selected":""}>${esc(s)}</option>`).join("")}</select>
+    <h3>Notes</h3>
+    <ul class="log">${(a.notes||[]).slice().reverse().map(n=>`<li><time>${esc(when(n.at))}</time>${esc(n.text)}</li>`).join("")||'<li style="color:var(--muted)">No notes yet.</li>'}</ul>
+    <textarea id="note" rows="3" placeholder="Add a note for the team" style="margin-top:8px"></textarea>
+    <div class="acts"><button class="btn primary" id="addnote">Add note</button></div>
+    <h3>History</h3>
+    <ul class="log">${(a.history||[]).slice().reverse().map(h=>`<li><time>${esc(when(h.at))} · ${esc(h.by)}</time>${esc(h.what)}</li>`).join("")}</ul>`;
+  $("#stage").onchange = ()=> patch({stage:$("#stage").value});
+  $("#addnote").onclick = ()=>{ const t = $("#note").value.trim(); if (t) patch({note:t}); };
+  $("#copy").onclick = async ()=>{ try{ await navigator.clipboard.writeText(location.origin+"/p/"+a.reference); $("#copy").textContent="Copied"; }catch{ prompt("Copy this link", location.origin+"/p/"+a.reference); } };
+  $("#del").onclick = async ()=>{
+    if (!confirm("Delete "+a.name+" ("+a.reference+") for good? Their profile link stops working.")) return;
+    try{ await api("/api/admin/applicants/"+encodeURIComponent(a.reference),{method:"DELETE"}); }catch(e){ alert(e.message); return; }
+    list = list.filter(x=>x.reference!==a.reference); current = null; draw();
+    $("#panel").innerHTML = '<p class="empty">Deleted.</p>';
+  };
+}
+async function patch(b){
+  try{
+    const out = await api("/api/admin/applicants/"+encodeURIComponent(current.reference),{method:"PATCH",body:JSON.stringify(b)});
+    current = out.applicant;
+    const row = list.find(x=>x.reference===current.reference); if (row) row.stage = current.stage;
+    draw(); panel();
+  }catch(e){ alert(e.message); }
+}
+boot();
+</script>
+</body>
+</html>
